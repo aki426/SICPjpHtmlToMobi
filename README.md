@@ -1,0 +1,2 @@
+# SICPjpHtmlToMobi
+SICPのhtml版をごにょごにょしてmobiにするよ
