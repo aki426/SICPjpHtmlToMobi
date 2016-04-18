@@ -142,14 +142,6 @@ function Rewrite-HTML ($file) {
         $line = $line -replace "href=`"#ft", ("href=`"#" + $file_name + "ft")
         $line = $line -replace "name=`"ftnt", ("name=`"" + $file_name + "ftnt")
         $line = $line -replace "href=`"#ftnt", ("href=`"#" + $file_name + "ftnt")
-
-        #脚注問題対応
-        #$line = $line -replace "<tt>", "<pre>"
-        #$line = $line -replace "</tt><br>", "</pre>"
-        #$line = $line -replace "</tt>", "</pre>"
-        $line = $line -replace "<tt>", "<span style=`"font-family: monospace`">"
-        #$line = $line -replace "</tt><br>", "</span>"
-        $line = $line -replace "</tt>", "</span>"
     
         #脚注欄区切り線
         if ($line -match "<p></p><div class=`"smallprint`"><hr></div>") {
