@@ -41,13 +41,15 @@ $Script:index_list = @()
 #索引リンクの張り替え
 #xindx.html内でしか使われていない。全行適用。
 function Rename-Index ($line) {
-    if ($line -match "href=`"x(?<pagenum>\d+).html#index(?<indxnum>\d+)`"") {
+    $line = $line -replace "x010.html#", "#xpre1"
+    $line = $line -replace "x020.html#", "#xpre2"
+
+    while ($line -match "href=`"x(?<pagenum>\d+).html#index(?<indxnum>\d+)`"") {
         $pagenum = $Matches."pagenum"
         $indxnum = $Matches."indxnum"
 
         if (("x" + $pagenum + "index" + $indxnum) -in $Script:index_list) {
-            #"x" + $pagenum + "index" + $indxnum | Out-Default
-            $line = $line -replace ("href=`"x" + $pagenum + ".html#index"), ("href=`"#x" + $pagenum + "index")
+            $line = $line -replace ("href=`"x" + $pagenum + ".html#index" + $indxnum), ("href=`"#x" + $pagenum + "index" + $indxnum)
         } else {
             $line = Rewrite-PageLink ($line -replace ("#index" + $indxnum), "")
         }
@@ -61,7 +63,7 @@ function Rewrite-HTML ($file) {
     $x = Get-Content $file -Encoding UTF8
     $file_name = $file.BaseName
 
-    "<hr />"
+    "<hr>"
 
     #各章リンク場所の移動
     if ((Rewrite-PageLink $x[13]) -match ".*name=`"(?<name>[^`"]+)`".*href=`"(?<href>[^`"]+)`"") {
@@ -90,11 +92,11 @@ function Rewrite-HTML ($file) {
 
         #章頭の引用文を<blockquote>タグで囲む
         if ($line -match "<p style=`"padding-left: 100mm;`">") {
-            $line = $line -replace "<p style=`"padding-left: 100mm;`">", "<p><blockquote>"
+            $line = $line -replace "<p style=`"padding-left: 100mm;`">", "<blockquote><p>"
             $blockquote_flag = $true
         }
         if (($blockquote_flag -eq $true) -and ($line -match "</p>") ) {
-            $line = $line -replace "</p>", "</blockquote></p>"
+            $line = $line -replace "</p>", "</p></blockquote>"
             $blockquote_flag = $false
         }
 
@@ -113,6 +115,8 @@ function Rewrite-HTML ($file) {
         $line = $line -replace "⟨", "&lt;"
         $line = $line -replace "⟩", "&gt;"
 
+        #なぜか.pngにリンクされていないimgタグがある
+        $line = $line -replace "`"mapsto`"", "`"mapsto.png`""
 
         #章タイトルのタグづけ入れ子ミス
         if (($line -match ".*<a href=.*") -and ($x[$i + 1] -match ".*<h2>.*")) {
@@ -151,17 +155,14 @@ function Rewrite-HTML ($file) {
         if ($line -match "<p></p><div class=`"smallprint`"><hr></div>") {
             if ($x[$i + 1] -match ".*目次.*前節.*") {
                 #脚注が無くてすぐナビゲータなら区切り線は要らない
-                $line = "" #"</p>"
+                $line = $line -replace "<p></p><div class=`"smallprint`"><hr></div>", ""
             } else {
-                $line = $line -replace "<p></p><div class=`"smallprint`"><hr></div>" , "<hr />"
+                $line = $line -replace "<p></p><div class=`"smallprint`"><hr></div>", "<hr>"
             }
         }
 
-        #改行タグ
-        $line = $line -replace "<br>", "<br />"
-
         #末尾のナビゲータは削除
-        if ($line -match "<p.*目次.*前節.*") {
+        if ($line -match "^<p.*目次.*前節.*") {
             $line = ""
         } elseif ($line -match "^</p>.*目次.*前節.*") {
             $line = "</p>"
@@ -192,14 +193,14 @@ function Rewrite-HTML ($file) {
 "@ | Out-File -Encoding utf8 sicp_jp.html
 
 
-Rewrite-HTML ".\xcont.html" | foreach {
+Rewrite-HTML (ls ".\xcont.html") | foreach {
     Rewrite-PageLink $_
 } | Out-File -Encoding utf8 sicp_jp.html -Append
 
-Rewrite-HTML .\xfore.html | Out-File -Encoding utf8 sicp_jp.html -Append
-Rewrite-HTML .\xpre2.html | Out-File -Encoding utf8 sicp_jp.html -Append
-Rewrite-HTML .\xpre1.html | Out-File -Encoding utf8 sicp_jp.html -Append
-Rewrite-HTML .\xackn.html | Out-File -Encoding utf8 sicp_jp.html -Append
+Rewrite-HTML (ls ".\xfore.html") | Out-File -Encoding utf8 sicp_jp.html -Append
+Rewrite-HTML (ls ".\xpre2.html") | Out-File -Encoding utf8 sicp_jp.html -Append
+Rewrite-HTML (ls ".\xpre1.html") | Out-File -Encoding utf8 sicp_jp.html -Append
+Rewrite-HTML (ls ".\xackn.html") | Out-File -Encoding utf8 sicp_jp.html -Append
 
 ls -Filter "*.html" | foreach {
     if ($_.BaseName -match "x\d\d\d") {
@@ -208,17 +209,18 @@ ls -Filter "*.html" | foreach {
 } | Out-File -Encoding utf8 sicp_jp.html -Append
 
 
-Rewrite-HTML .\xrefr.html | Out-File -Encoding utf8 sicp_jp.html -Append
+Rewrite-HTML (ls ".\xrefr.html") | Out-File -Encoding utf8 sicp_jp.html -Append
 
-Rewrite-HTML .\xexls.html | foreach {
+Rewrite-HTML (ls ".\xexls.html") | foreach {
     Rewrite-ExLink $_
 } | Out-File -Encoding utf8 sicp_jp.html -Append
 
-Rewrite-HTML .\xindx.html | foreach {
+Rewrite-HTML (ls ".\xindx.html") | foreach {
     Rename-Index $_
 } | Out-File -Encoding utf8 sicp_jp.html -Append
 
 "</body></html>" | Out-File -Encoding utf8 sicp_jp.html -Append
 
 
-iex "D:\bin\kindlegen_win32_v2_9\kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o test.mobi"
+iex "D:\bin\kindlegen_win32_v2_9\kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
+#iex "kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"

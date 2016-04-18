@@ -1,0 +1,63 @@
+
+●表紙
+index.html => 対応するnameタグは無い
+●目次
+xcont.html => #ccont
+●序文
+xfore.html => name="sfore" #sfore
+●第二版への前文
+xpre2.html => name="spre2" #spre2
+●第一版への前文
+xpre1.html => name="spre1" #spre1
+●謝辞
+xackn.html => name="sackn" #sackn
+
+
+＜本文＞
+$file.name -replace ".html", "" -replace "^x" , "ss" #ssxxx
+
+
+●参考文献
+xrefr.html => name="srefr" #srefr
+●問題リスト
+xexls.html => name="sexls" #sexls
+●索引
+xindx.html => #iindex
+
+------------------------------------------------------------------
+●※第一版への前文：使わない
+x010.html => name="spre1
+●※第二版への前文：使わない
+x020.html => name="spre2"
+●※目次：使わない
+xcont_001.html => 対応するタグは無い
+------------------------------------------------------------------
+
+xcont.html
+
+<a name="ccont" href="#cont">
+<h4>目次</h4> </a> <br> <br>
+
+　　<a indepth="true" name="cont" href="xcont.html">目次</a> <br>
+　　<a indepth="true" name="fore" href="xfore.html">序文</a> <br>
+　　<a indepth="true" name="pre2" href="xpre2.html">第二版への前文</a> <br>
+　　<a indepth="true" name="pre1" href="xpre1.html">第一版への前文</a> <br>
+　　<a indepth="true" name="ackn" href="xackn.html">謝辞</a> <br>
+　　
+sXXX => xXXX.html -> #ssxxx
+
+　　<a indepth="true" name="refr" href="xrefr.html">参考文献</a> <br>
+　　<a indepth="true" name="exls" href="xexls.html">問題リスト</a> <br>
+　　<a indepth="true" name="indx" href="xindx.html">索引</a> <br>
+　　
+   
+name="indexXXX"は全ファイル通して固有ではないので、name="[file_name]indexXXX"に変換が必要。
+
+参照リンクも
+<a indepth="true" href="x010.html#index0">Minsky, Marvin Lee</a> <a indepth="true" href="x532.html#index3269">[2]</a> <br>
+<a indepth="true" href="#x010index0">Minsky, Marvin Lee</a> <a indepth="true" href="#x532index3269">[2]</a> <br>
+とする。
+
+脚注も同じ。 ft\d ftnt\d
+<a name="ft8" href="#ftnt8"><small>8</small></a>
+<a name="[file_name]ft8" href="#[file_name]ftnt8"><small>8</small></a>
