@@ -214,5 +214,5 @@ Rewrite-HTML (ls ".\xindx.html") | foreach {
 "</body></html>" | Out-File -Encoding utf8 sicp_jp.html -Append
 
 
-iex "D:\bin\kindlegen_win32_v2_9\kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
-#iex "kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
+#iex "D:\bin\kindlegen_win32_v2_9\kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
+iex "kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
