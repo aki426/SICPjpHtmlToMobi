@@ -179,6 +179,13 @@ function Rewrite-HTML ($file) {
             $Script:index_list += $file_name + "index" + $Matches."indxnum"
         }
 
+        #問題リンク
+        if ($line -match "<a name=`"ex(?<exnum>\d+)`">") {
+            $b = "<a name=`"ex" + $Matches."exnum" + "`">"
+            $a = "<a href=`"#lex" + $Matches."exnum" + "`" name=`"ex" + $Matches."exnum" + "`">"
+            $line = $line -replace $b, $a
+        }
+
         #脚注リンク
         $line = $line -replace "name=`"ft", ("name=`"" + $file_name + "ft")
         $line = $line -replace "href=`"#ft", ("href=`"#" + $file_name + "ft")
@@ -245,9 +252,65 @@ ls -Filter "*.html" | foreach {
 
 Rewrite-HTML (ls ".\xrefr.html") | Out-File -Encoding utf8 sicp_jp.html -Append
 
+
+@"
+<hr>
+<a name="sexls"></a>
+<p align="right">[ <a href="#ccont">目次</a>, <a href="#srefr">前節</a>, <a href="#iindx">次節</a>, <a href="#iindx">索引</a> ]</p>
+<h2><a href="#exls">問題リスト</a></h2>  
+"@ | Out-File -Encoding utf8 sicp_jp.html -Append
+
+function Get-ExLinkStr ($chapt_no, $ex_no) {
+    $ex_id = $chapt_no.ToString() + $ex_no.ToString("00")
+    $ex_str = "問題 " + $chapt_no.ToString() + "." + $ex_no.ToString()
+    if ($ex_no -le 9) {
+        $space = "&nbsp;"
+    } else {
+        $space = ""
+    }
+
+    "<a href=`"#ex"+ $ex_id + "`" name=`"lex" + $ex_id + "`"><b>" + $ex_str + "</b></a>" + $space + "　"
+    if (($ex_no % 5) -eq 0){
+        "<br>"
+    }
+}
+
+function Get-ExChaptContents () {
+    "<p>"
+    for ($ex_no = 1; $ex_no -le 46; $ex_no++) {
+        Get-ExLinkStr -chapt_no 1 -ex_no $ex_no
+    }
+
+    "</p><p>"
+    for ($ex_no = 1; $ex_no -le 97; $ex_no++) { 
+        Get-ExLinkStr -chapt_no 2 -ex_no $ex_no
+    }
+
+    "</p><p>"
+    for ($ex_no = 1; $ex_no -le 82; $ex_no++) { 
+        Get-ExLinkStr -chapt_no 3 -ex_no $ex_no
+    }
+
+    "</p><p>"
+    for ($ex_no = 1; $ex_no -le 79; $ex_no++) { 
+        Get-ExLinkStr -chapt_no 4 -ex_no $ex_no
+    }
+
+    "</p><p>"
+    for ($ex_no = 1; $ex_no -le 52; $ex_no++) { 
+        Get-ExLinkStr -chapt_no 5 -ex_no $ex_no
+    }
+
+    "</p>"
+}
+
+Get-ExChaptContents | Out-File -Encoding utf8 sicp_jp.html -Append
+
+<#
 Rewrite-HTML (ls ".\xexls.html") | foreach {
     Rewrite-ExLink $_
 } | Out-File -Encoding utf8 sicp_jp.html -Append
+#>
 
 Rewrite-HTML (ls ".\xindx.html") | foreach {
     Rename-Index $_
