@@ -77,8 +77,9 @@ function Rewrite-HTML ($file) {
         "<h2><a href=`"" + $cont_ref + "`">"
         $x[14] -replace "<h2>", "" -replace "</h2> *</a>", "</a></h2>" -replace "<br>", ""
     } elseif ($x[14] -match ".*<h4>.*") {
-        "<h4><a href=`"" + $cont_ref + "`">"
-        $x[14] -replace "<h4>", "" -replace "</h4> *</a>", "</a></h4>" -replace "<br>", ""
+        #h4はh2へ。目次、序文、全文ｘ２、謝辞、参考文献、問題リスト、だけがなぜかh4なので
+        "<h2><a href=`"" + $cont_ref + "`">"
+        $x[14] -replace "<h4>", "" -replace "</h4> *</a>", "</a></h2>" -replace "<br>", ""
     }
 
     $blockquote_flag　= $false #引用文判定用フラグ
@@ -111,6 +112,41 @@ function Rewrite-HTML ($file) {
 
         $line = $line -replace "<i><i>f</i></i>", "<i>f</i>"
 
+        #「,.」は読みにくいので全角に変える
+        while ($line -match "(?<c>[亜-熙ぁ-んァ-ヶ]), ") {
+            #カンマ＋スペース
+            $c = $Matches."c"
+            $line = $line -replace ($c + ", "), ($c + "，")
+        }
+        while ($line -match "(?<c>[亜-熙ぁ-んァ-ヶ]),") {
+            #カンマのみ
+            $c = $Matches."c"
+            $line = $line -replace ($c + ","), ($c + "，")
+        }
+        while ($line -match "(?<c>[亜-熙ぁ-んァ-ヶ])\. ") {
+            #ドット＋スペース
+            $c = $Matches."c"
+            $line = $line -replace ($c + "\. "), ($c + "．")
+        }
+        while ($line -match "(?<c>[亜-熙ぁ-んァ-ヶ])\.") {
+            #ドットのみ
+            $c = $Matches."c"
+            $line = $line -replace ($c + "\."), ($c + "．")
+        }
+
+
+        if ($file_name -eq "x117") {
+            $line = $line -replace "`$x$" , "<i>x</i>"
+        }
+        if ($file_name -eq "x122") {
+            $line = $line -replace  "Fib}" , "Fib"
+        }
+        if ($file_name -eq "x126") {
+            $line = $line -replace  "{\\it Arithmetic}" , "<i>Arithmetic</i>"
+        }
+        
+        # x126 {\it Arithmetic} , <i>Arithmetic</>
+
         #特殊文字対策
         $line = $line -replace "⟨", "&lt;"
         $line = $line -replace "⟩", "&gt;"
@@ -118,6 +154,7 @@ function Rewrite-HTML ($file) {
         #なぜか.pngにリンクされていないimgタグがある
         $line = $line -replace "`"mapsto`"", "`"mapsto.png`""
 
+        <#頭の方で修正したからもう要らないのでは？　心配なのでコメントアウトで残す
         #章タイトルのタグづけ入れ子ミス
         if (($line -match ".*<a href=.*") -and ($x[$i + 1] -match ".*<h2>.*")) {
             $line = "<h2>" + $line
@@ -130,6 +167,11 @@ function Rewrite-HTML ($file) {
         }
         $line = $line -replace "<h4>", ""
         $line = $line -replace "</h4> *</a>", "</a></h4>"
+        #>
+
+        #<h5></h5>は一つ上げて<h4></h4>にする
+        $line = $line -replace "<h5>", "<h4>"
+        $line = $line -replace "</h5>", "</h4>"
 
         #索引リンク
         if ($line -match "name=`"index(?<indxnum>\d+)`"") {
@@ -214,5 +256,5 @@ Rewrite-HTML (ls ".\xindx.html") | foreach {
 "</body></html>" | Out-File -Encoding utf8 sicp_jp.html -Append
 
 
-#iex "D:\bin\kindlegen_win32_v2_9\kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
-iex "kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
+iex "D:\bin\kindlegen_win32_v2_9\kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
+#iex "kindlegen.exe sicp_jp.html -c2 -verbose -locale en -o sicp_jp.mobi"
